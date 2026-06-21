@@ -30,28 +30,28 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div id="timer-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-80 max-w-full mx-4 text-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-full mx-4 text-center" style="width:512px">
             <div id="timer-input-screen">
-                <p class="text-2xl font-black text-school mb-6">&#x23F1;&#xFE0F; タイマー</p>
+                <p class="text-4xl font-black text-school mb-6">&#x23F1;&#xFE0F; タイマー</p>
                 <div class="flex items-center justify-center gap-3 mb-6">
                     <input id="timer-minutes-input" type="number" min="1" max="99" value="5"
-                        class="w-24 text-center text-4xl font-black border-2 border-school rounded-xl p-2 outline-none">
-                    <span class="text-xl font-bold text-gray-600">分</span>
+                        class="text-center font-black border-2 border-school rounded-xl p-2 outline-none" style="width:150px;font-size:3.6rem">
+                    <span class="text-3xl font-bold text-gray-600">分</span>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="startTimer()" class="flex-1 bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors text-lg">スタート</button>
-                    <button onclick="closeTimer()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-lg">とじる</button>
+                    <button onclick="startTimer()" class="flex-1 bg-school text-white font-bold py-5 rounded-xl hover:bg-blue-900 transition-colors text-2xl">スタート</button>
+                    <button onclick="closeTimer()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-5 rounded-xl hover:bg-gray-200 transition-colors text-2xl">とじる</button>
                 </div>
             </div>
             <div id="timer-running-screen" style="display:none;">
-                <p class="text-sm font-bold text-gray-400 mb-2">のこり じかん</p>
-                <p id="timer-display" class="timer-digit text-7xl font-black text-school mb-2 tracking-tight">00:00</p>
-                <div class="w-full bg-gray-100 rounded-full h-3 mb-6">
-                    <div id="timer-progress" class="bg-school h-3 rounded-full transition-all duration-1000" style="width:100%"></div>
+                <p class="text-xl font-bold text-gray-400 mb-2">のこり じかん</p>
+                <p id="timer-display" class="timer-digit font-black text-school mb-2 tracking-tight" style="font-size:7.2rem">00:00</p>
+                <div class="w-full bg-gray-100 rounded-full h-5 mb-6">
+                    <div id="timer-progress" class="bg-school h-5 rounded-full transition-all duration-1000" style="width:100%"></div>
                 </div>
                 <div class="flex gap-3">
-                    <button id="timer-pause-btn" onclick="togglePause()" class="flex-1 bg-yellow-400 text-white font-bold py-3 rounded-xl hover:bg-yellow-500 transition-colors text-base">&#x23F8; いったん とめる</button>
-                    <button onclick="resetTimer()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-base">リセット</button>
+                    <button id="timer-pause-btn" onclick="togglePause()" class="flex-1 bg-yellow-400 text-white font-bold py-5 rounded-xl hover:bg-yellow-500 transition-colors text-xl">&#x23F8; いったん とめる</button>
+                    <button onclick="resetTimer()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-5 rounded-xl hover:bg-gray-200 transition-colors text-xl">リセット</button>
                 </div>
             </div>
             <div id="timer-timeup-screen" style="display:none;">
@@ -199,7 +199,7 @@
             var pct = totalSeconds > 0 ? (remainingSeconds / totalSeconds) * 100 : 0;
             var bar = document.getElementById("timer-progress");
             bar.style.width = pct + "%";
-            if (pct > 50) bar.className = "bg-school h-3 rounded-full transition-all duration-1000";
+            if (pct > 50) bar.className = "bg-school h-5 rounded-full transition-all duration-1000";
             else if (pct > 20) bar.className = "bg-yellow-400 h-3 rounded-full transition-all duration-1000";
             else bar.className = "bg-red-500 h-3 rounded-full transition-all duration-1000";
         }
