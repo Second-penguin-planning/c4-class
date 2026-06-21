@@ -24,171 +24,197 @@
         .lesson-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
         .lesson-card { transition: transform 0.2s, box-shadow 0.2s; }
         .today-badge { animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .timer-digit { font-variant-numeric: tabular-nums; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-
-    <!-- Header -->
+    <div id="timer-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-80 max-w-full mx-4 text-center">
+            <div id="timer-input-screen">
+                <p class="text-2xl font-black text-school mb-6">&#x23F1;&#xFE0F; タイマー</p>
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <input id="timer-minutes-input" type="number" min="1" max="99" value="5"
+                        class="w-24 text-center text-4xl font-black border-2 border-school rounded-xl p-2 outline-none">
+                    <span class="text-xl font-bold text-gray-600">分</span>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="startTimer()" class="flex-1 bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors text-lg">スタート</button>
+                    <button onclick="closeTimer()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-lg">とじる</button>
+                </div>
+            </div>
+            <div id="timer-running-screen" style="display:none;">
+                <p class="text-sm font-bold text-gray-400 mb-2">のこり じかん</p>
+                <p id="timer-display" class="timer-digit text-7xl font-black text-school mb-2 tracking-tight">00:00</p>
+                <div class="w-full bg-gray-100 rounded-full h-3 mb-6">
+                    <div id="timer-progress" class="bg-school h-3 rounded-full transition-all duration-1000" style="width:100%"></div>
+                </div>
+                <div class="flex gap-3">
+                    <button id="timer-pause-btn" onclick="togglePause()" class="flex-1 bg-yellow-400 text-white font-bold py-3 rounded-xl hover:bg-yellow-500 transition-colors text-base">&#x23F8; いったん とめる</button>
+                    <button onclick="resetTimer()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-base">リセット</button>
+                </div>
+            </div>
+            <div id="timer-timeup-screen" style="display:none;">
+                <p class="text-6xl mb-4">&#x1F389;</p>
+                <p class="text-3xl font-black text-accent mb-2">タイムアップ！</p>
+                <p class="text-gray-500 mb-6">じかんに なりました！</p>
+                <button onclick="resetTimer()" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors text-lg">もう一度</button>
+            </div>
+        </div>
+    </div>
     <header class="bg-school text-white shadow-lg">
         <div class="max-w-3xl mx-auto px-4 py-6 text-center">
             <p class="text-sm text-blue-200 tracking-widest mb-1">秀明神戸国際学院</p>
             <h1 class="text-4xl md:text-5xl font-black tracking-wide">C4 クラス</h1>
             <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm">
-                <span class="bg-white/20 rounded-full px-4 py-1">
-                    📅 毎週月曜日　13:00 〜 16:15
-                </span>
-                <span class="bg-white/20 rounded-full px-4 py-1">
-                    👨‍🏫 担当：とくなが先生
-                </span>
+                <span class="bg-white/20 rounded-full px-4 py-1">&#x1F4C5; 毎週月曜日　13:00 〜 16:15</span>
+                <span class="bg-white/20 rounded-full px-4 py-1">&#x1F468;&#x200D;&#x1F3EB; 担当：とくなが先生</span>
             </div>
         </div>
     </header>
-
     <main class="max-w-3xl mx-auto px-4 py-8 space-y-8">
-
-        <!-- Quick Links -->
         <section>
             <h2 class="text-lg font-bold text-school mb-4 flex items-center gap-2">
-                <span class="w-1 h-5 bg-accent rounded"></span>
-                べんきょう リンク
+                <span class="w-1 h-5 bg-accent rounded"></span>べんきょう リンク
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                <a href="https://second-penguin-planning.github.io/roulette_japanese_language_sturding/"
-                   target="_blank"
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                <a href="https://second-penguin-planning.github.io/roulette_japanese_language_sturding/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-school rounded-xl p-5 text-school font-bold text-center hover:bg-school hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">🎡</span>
-                    <span class="text-sm leading-tight">ルーレット</span>
+                    <span class="text-3xl">&#x1F3A1;</span><span class="text-sm leading-tight">ルーレット</span>
                 </a>
-                <a href="https://second-penguin-planning.github.io/japanese-study-diagnosis2/"
-                   target="_blank"
+                <a href="https://second-penguin-planning.github.io/japanese-study-diagnosis2/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-accent rounded-xl p-5 text-accent font-bold text-center hover:bg-accent hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">🔍</span>
-                    <span class="text-sm leading-tight">学習タイプ 選定</span>
+                    <span class="text-3xl">&#x1F50D;</span><span class="text-sm leading-tight">学習タイプ 選定</span>
                 </a>
-                <a href="https://www.irodori.jpf.go.jp/"
-                   target="_blank"
+                <a href="https://www.irodori.jpf.go.jp/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-green-600 rounded-xl p-5 text-green-700 font-bold text-center hover:bg-green-600 hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">🌿</span>
-                    <span class="text-sm leading-tight">いろどり</span>
+                    <span class="text-3xl">&#x1F33F;</span><span class="text-sm leading-tight">いろどり</span>
                 </a>
-                <a href="https://second-penguin-planning.github.io/flush-cards/"
-                   target="_blank"
+                <a href="https://second-penguin-planning.github.io/flush-cards/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-purple-600 rounded-xl p-5 text-purple-700 font-bold text-center hover:bg-purple-600 hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">🃏</span>
-                    <span class="text-sm leading-tight">フラッシュカード</span>
+                    <span class="text-3xl">&#x1F0CF;</span><span class="text-sm leading-tight">フラッシュカード</span>
                 </a>
+                <button onclick="openTimer()"
+                   class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-orange-500 rounded-xl p-5 text-orange-600 font-bold text-center hover:bg-orange-500 hover:text-white transition-colors duration-200 shadow-sm cursor-pointer">
+                    <span class="text-3xl">&#x23F1;&#xFE0F;</span><span class="text-sm leading-tight">タイマー</span>
+                </button>
             </div>
         </section>
-
-        <!-- Lesson Schedule -->
         <section>
             <h2 class="text-lg font-bold text-school mb-4 flex items-center gap-2">
-                <span class="w-1 h-5 bg-accent rounded"></span>
-                じゅぎょう スケジュール
+                <span class="w-1 h-5 bg-accent rounded"></span>じゅぎょう スケジュール
             </h2>
             <div class="space-y-3">
-
-                <!-- 5月25日 -->
                 <div class="lesson-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-                    <div class="text-center min-w-[64px]">
-                        <p class="text-xs text-gray-400 font-medium">5月</p>
-                        <p class="text-3xl font-black text-school leading-none">25</p>
-                        <p class="text-xs text-gray-400">（月）</p>
-                    </div>
+                    <div class="text-center min-w-[64px]"><p class="text-xs text-gray-400 font-medium">5月</p><p class="text-3xl font-black text-school leading-none">25</p><p class="text-xs text-gray-400">（月）</p></div>
                     <div class="h-12 w-px bg-gray-200"></div>
-                    <div class="flex-1">
-                        <p class="text-xs text-gray-400 mb-1">みんなの日本語</p>
-                        <p class="text-lg font-bold text-gray-800">第5課</p>
-                    </div>
+                    <div class="flex-1"><p class="text-xs text-gray-400 mb-1">みんなの日本語</p><p class="text-lg font-bold text-gray-800">第5課</p></div>
                     <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-3 py-1 font-medium">終了</span>
                 </div>
-
-                <!-- 6月1日 -->
                 <div class="lesson-card bg-school/5 rounded-xl shadow-sm border-2 border-school p-4 flex items-center gap-4">
-                    <div class="text-center min-w-[64px]">
-                        <p class="text-xs text-school font-medium">6月</p>
-                        <p class="text-3xl font-black text-school leading-none">1</p>
-                        <p class="text-xs text-school">（月）</p>
-                    </div>
+                    <div class="text-center min-w-[64px]"><p class="text-xs text-school font-medium">6月</p><p class="text-3xl font-black text-school leading-none">1</p><p class="text-xs text-school">（月）</p></div>
                     <div class="h-12 w-px bg-school/30"></div>
-                    <div class="flex-1">
-                        <p class="text-xs text-gray-500 mb-1">みんなの日本語</p>
-                        <p class="text-lg font-bold text-gray-800">第6課</p>
-                    </div>
+                    <div class="flex-1"><p class="text-xs text-gray-500 mb-1">みんなの日本語</p><p class="text-lg font-bold text-gray-800">第6課</p></div>
                     <span class="today-badge text-xs bg-school text-white rounded-full px-3 py-1 font-bold">今日</span>
                 </div>
-
-                <!-- 6月8日 -->
                 <div class="lesson-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-                    <div class="text-center min-w-[64px]">
-                        <p class="text-xs text-gray-400 font-medium">6月</p>
-                        <p class="text-3xl font-black text-gray-400 leading-none">8</p>
-                        <p class="text-xs text-gray-400">（月）</p>
-                    </div>
+                    <div class="text-center min-w-[64px]"><p class="text-xs text-gray-400 font-medium">6月</p><p class="text-3xl font-black text-gray-400 leading-none">8</p><p class="text-xs text-gray-400">（月）</p></div>
                     <div class="h-12 w-px bg-gray-200"></div>
-                    <div class="flex-1">
-                        <p class="text-xs text-gray-400 mb-1">みんなの日本語</p>
-                        <p class="text-lg font-bold text-gray-500">第7課</p>
-                    </div>
+                    <div class="flex-1"><p class="text-xs text-gray-400 mb-1">みんなの日本語</p><p class="text-lg font-bold text-gray-500">第7課</p></div>
                     <span class="text-xs bg-gray-100 text-gray-400 rounded-full px-3 py-1 font-medium">予定</span>
                 </div>
-
-                <!-- 6月15日 -->
                 <div class="lesson-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-                    <div class="text-center min-w-[64px]">
-                        <p class="text-xs text-gray-400 font-medium">6月</p>
-                        <p class="text-3xl font-black text-gray-400 leading-none">15</p>
-                        <p class="text-xs text-gray-400">（月）</p>
-                    </div>
+                    <div class="text-center min-w-[64px]"><p class="text-xs text-gray-400 font-medium">6月</p><p class="text-3xl font-black text-gray-400 leading-none">15</p><p class="text-xs text-gray-400">（月）</p></div>
                     <div class="h-12 w-px bg-gray-200"></div>
-                    <div class="flex-1">
-                        <p class="text-xs text-gray-400 mb-1">みんなの日本語</p>
-                        <p class="text-lg font-bold text-gray-500">第8課</p>
-                    </div>
+                    <div class="flex-1"><p class="text-xs text-gray-400 mb-1">みんなの日本語</p><p class="text-lg font-bold text-gray-500">第8課</p></div>
                     <span class="text-xs bg-gray-100 text-gray-400 rounded-full px-3 py-1 font-medium">予定</span>
                 </div>
-
-                <!-- 6月22日 -->
                 <div class="lesson-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-                    <div class="text-center min-w-[64px]">
-                        <p class="text-xs text-gray-400 font-medium">6月</p>
-                        <p class="text-3xl font-black text-gray-400 leading-none">22</p>
-                        <p class="text-xs text-gray-400">（月）</p>
-                    </div>
+                    <div class="text-center min-w-[64px]"><p class="text-xs text-gray-400 font-medium">6月</p><p class="text-3xl font-black text-gray-400 leading-none">22</p><p class="text-xs text-gray-400">（月）</p></div>
                     <div class="h-12 w-px bg-gray-200"></div>
-                    <div class="flex-1">
-                        <p class="text-xs text-gray-400 mb-1">みんなの日本語</p>
-                        <p class="text-lg font-bold text-gray-500">第9課</p>
-                    </div>
+                    <div class="flex-1"><p class="text-xs text-gray-400 mb-1">みんなの日本語</p><p class="text-lg font-bold text-gray-500">第9課</p></div>
                     <span class="text-xs bg-gray-100 text-gray-400 rounded-full px-3 py-1 font-medium">予定</span>
                 </div>
-
-                <!-- 6月29日 -->
                 <div class="lesson-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4">
-                    <div class="text-center min-w-[64px]">
-                        <p class="text-xs text-gray-400 font-medium">6月</p>
-                        <p class="text-3xl font-black text-gray-400 leading-none">29</p>
-                        <p class="text-xs text-gray-400">（月）</p>
-                    </div>
+                    <div class="text-center min-w-[64px]"><p class="text-xs text-gray-400 font-medium">6月</p><p class="text-3xl font-black text-gray-400 leading-none">29</p><p class="text-xs text-gray-400">（月）</p></div>
                     <div class="h-12 w-px bg-gray-200"></div>
-                    <div class="flex-1">
-                        <p class="text-xs text-gray-400 mb-1">みんなの日本語</p>
-                        <p class="text-lg font-bold text-gray-500">第10課</p>
-                    </div>
+                    <div class="flex-1"><p class="text-xs text-gray-400 mb-1">みんなの日本語</p><p class="text-lg font-bold text-gray-500">第10課</p></div>
                     <span class="text-xs bg-gray-100 text-gray-400 rounded-full px-3 py-1 font-medium">予定</span>
                 </div>
-
             </div>
         </section>
     </main>
-
     <footer class="mt-12 py-6 text-center text-xs text-gray-400">
         <p>秀明神戸国際学院 C4クラス &nbsp;|&nbsp; 担当：とくなが先生</p>
     </footer>
-
+    <script>
+        var timerInterval = null;
+        var totalSeconds = 0;
+        var remainingSeconds = 0;
+        var isPaused = false;
+        function openTimer() {
+            document.getElementById("timer-modal").style.display = "flex";
+            showScreen("input");
+        }
+        function closeTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById("timer-modal").style.display = "none";
+        }
+        function showScreen(name) {
+            document.getElementById("timer-input-screen").style.display = name === "input" ? "block" : "none";
+            document.getElementById("timer-running-screen").style.display = name === "running" ? "block" : "none";
+            document.getElementById("timer-timeup-screen").style.display = name === "timeup" ? "block" : "none";
+        }
+        function startTimer() {
+            var minutes = parseInt(document.getElementById("timer-minutes-input").value) || 1;
+            totalSeconds = minutes * 60;
+            remainingSeconds = totalSeconds;
+            isPaused = false;
+            updateDisplay();
+            updateProgress();
+            showScreen("running");
+            document.getElementById("timer-pause-btn").textContent = "⏸ いったん とめる";
+            clearInterval(timerInterval);
+            timerInterval = setInterval(tick, 1000);
+        }
+        function tick() {
+            if (isPaused) return;
+            remainingSeconds--;
+            updateDisplay();
+            updateProgress();
+            if (remainingSeconds <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                setTimeout(function() { showScreen("timeup"); }, 200);
+            }
+        }
+        function updateDisplay() {
+            var m = Math.floor(remainingSeconds / 60);
+            var s = remainingSeconds % 60;
+            document.getElementById("timer-display").textContent =
+                String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+        }
+        function updateProgress() {
+            var pct = totalSeconds > 0 ? (remainingSeconds / totalSeconds) * 100 : 0;
+            var bar = document.getElementById("timer-progress");
+            bar.style.width = pct + "%";
+            if (pct > 50) bar.className = "bg-school h-3 rounded-full transition-all duration-1000";
+            else if (pct > 20) bar.className = "bg-yellow-400 h-3 rounded-full transition-all duration-1000";
+            else bar.className = "bg-red-500 h-3 rounded-full transition-all duration-1000";
+        }
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById("timer-pause-btn").textContent = isPaused ? "▶ つづける" : "⏸ いったん とめる";
+        }
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            showScreen("input");
+        }
+        document.getElementById("timer-modal").addEventListener("click", function(e) {
+            if (e.target === this) closeTimer();
+        });
+    </script>
 </body>
 </html>
