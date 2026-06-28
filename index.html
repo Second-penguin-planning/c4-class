@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C4クラス | 秀明神戸国際学院</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+Bengali:wght@400;700;900&family=Noto+Sans+Devanagari:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['"Noto Sans JP"', 'sans-serif'] },
+                    fontFamily: { sans: ['"Noto Sans JP"', '"Noto Sans Bengali"', '"Noto Sans Devanagari"', 'sans-serif'] },
                     colors: {
                         school: { DEFAULT: '#1a3a6e', light: '#e8eef8' },
                         accent: { DEFAULT: '#c0392b', light: '#fdf0ef' },
@@ -20,286 +20,468 @@
         }
     </script>
     <style>
-        body { font-family: 'Noto Sans JP', sans-serif; }
+        body { font-family: 'Noto Sans JP', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
         .lesson-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.10); }
         .lesson-card { transition: transform 0.2s, box-shadow 0.2s; }
         .today-badge { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
         .timer-digit { font-variant-numeric: tabular-nums; }
+        .lang-btn { transition: all 0.15s; }
+        .lang-btn.active { background: white; color: #1a3a6e; font-weight: 800; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+
     <!-- 質問モーダル -->
     <div id="question-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-full mx-4" style="width:480px">
             <div id="q-form-screen">
-                <p class="text-2xl font-black text-school mb-5">&#x2753; 質問する</p>
+                <p data-i18n="q_title" class="text-2xl font-black text-school mb-5"></p>
                 <div class="space-y-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">なまえ（名前）</label>
-                        <input id="q-name" type="text" placeholder="例：Ahmad Ali" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
+                        <label data-i18n="q_name" class="block text-xs font-bold text-gray-500 mb-1"></label>
+                        <input id="q-name" type="text" data-i18n-ph="q_name_ph" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">こくせき（国籍）</label>
-                        <input id="q-country" type="text" placeholder="例：Bangladesh" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
+                        <label data-i18n="q_country" class="block text-xs font-bold text-gray-500 mb-1"></label>
+                        <input id="q-country" type="text" data-i18n-ph="q_country_ph" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">メールアドレス</label>
-                        <input id="q-email" type="email" placeholder="例：example@email.com" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
+                        <label data-i18n="q_email" class="block text-xs font-bold text-gray-500 mb-1"></label>
+                        <input id="q-email" type="email" data-i18n-ph="q_email_ph" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">しつもん（質問）</label>
-                        <textarea id="q-message" rows="4" placeholder="質問を書いてください。" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school resize-none"></textarea>
+                        <label data-i18n="q_message" class="block text-xs font-bold text-gray-500 mb-1"></label>
+                        <textarea id="q-message" rows="4" data-i18n-ph="q_message_ph" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school resize-none"></textarea>
                     </div>
                 </div>
-                <p id="q-error" class="text-xs text-accent mt-2" style="display:none;">すべての項目を入力してください。</p>
+                <p id="q-error" data-i18n="q_error_empty" class="text-xs text-accent mt-2" style="display:none;"></p>
                 <div class="flex gap-3 mt-5">
-                    <button onclick="sendQuestion()" class="flex-1 bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors text-base">&#x1F4E8; おくる</button>
-                    <button onclick="closeQuestion()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-base">とじる</button>
+                    <button onclick="sendQuestion()" data-i18n="q_send" class="flex-1 bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors text-base"></button>
+                    <button onclick="closeQuestion()" data-i18n="q_close" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-base"></button>
                 </div>
             </div>
             <div id="q-sending-screen" style="display:none;" class="text-center py-6">
-                <p class="text-4xl mb-3">&#x23F3;</p>
-                <p class="text-lg font-bold text-gray-500">おくっています…</p>
+                <p class="text-4xl mb-3">⏳</p>
+                <p data-i18n="q_sending" class="text-lg font-bold text-gray-500"></p>
             </div>
             <div id="q-success-screen" style="display:none;" class="text-center py-6">
-                <p class="text-5xl mb-3">&#x2705;</p>
-                <p class="text-xl font-black text-school mb-2">おくりました！</p>
-                <p class="text-sm text-gray-500 mb-6">とくなが先生にとどきます。</p>
-                <button onclick="closeQuestion()" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors">とじる</button>
+                <p class="text-5xl mb-3">✅</p>
+                <p data-i18n="q_success_title" class="text-xl font-black text-school mb-2"></p>
+                <p data-i18n="q_success_sub" class="text-sm text-gray-500 mb-6"></p>
+                <button onclick="closeQuestion()" data-i18n="q_close" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors"></button>
             </div>
             <div id="q-error-screen" style="display:none;" class="text-center py-6">
-                <p class="text-5xl mb-3">&#x274C;</p>
-                <p class="text-xl font-black text-accent mb-2">エラーがありました</p>
-                <p class="text-sm text-gray-500 mb-6">もう一度 やってください。</p>
-                <button onclick="showQScreen('form')" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors">もどる</button>
+                <p class="text-5xl mb-3">❌</p>
+                <p data-i18n="q_err_title" class="text-xl font-black text-accent mb-2"></p>
+                <p data-i18n="q_err_sub" class="text-sm text-gray-500 mb-6"></p>
+                <button onclick="showQScreen('form')" data-i18n="q_back" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors"></button>
             </div>
         </div>
     </div>
+
+    <!-- タイマーモーダル -->
     <div id="timer-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
         <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-full mx-4 text-center" style="width:512px">
             <div id="timer-input-screen">
-                <p class="text-4xl font-black text-school mb-6">&#x23F1;&#xFE0F; タイマー</p>
+                <p data-i18n="timer_title" class="text-4xl font-black text-school mb-6"></p>
                 <div class="flex items-center justify-center gap-3 mb-6">
                     <input id="timer-minutes-input" type="number" min="1" max="99" value="5"
                         class="text-center font-black border-2 border-school rounded-xl p-2 outline-none" style="width:150px;font-size:3.6rem">
-                    <span class="text-3xl font-bold text-gray-600">分</span>
+                    <span data-i18n="timer_min" class="text-3xl font-bold text-gray-600"></span>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="startTimer()" class="flex-1 bg-school text-white font-bold py-5 rounded-xl hover:bg-blue-900 transition-colors text-2xl">スタート</button>
-                    <button onclick="closeTimer()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-5 rounded-xl hover:bg-gray-200 transition-colors text-2xl">とじる</button>
+                    <button onclick="startTimer()" data-i18n="timer_start" class="flex-1 bg-school text-white font-bold py-5 rounded-xl hover:bg-blue-900 transition-colors text-2xl"></button>
+                    <button onclick="closeTimer()" data-i18n="timer_close" class="flex-1 bg-gray-100 text-gray-600 font-bold py-5 rounded-xl hover:bg-gray-200 transition-colors text-2xl"></button>
                 </div>
             </div>
             <div id="timer-running-screen" style="display:none;">
-                <p class="text-xl font-bold text-gray-400 mb-2">のこり じかん</p>
+                <p data-i18n="timer_remaining" class="text-xl font-bold text-gray-400 mb-2"></p>
                 <p id="timer-display" class="timer-digit font-black text-school mb-2 tracking-tight" style="font-size:7.2rem">00:00</p>
                 <div class="w-full bg-gray-100 rounded-full h-5 mb-6">
                     <div id="timer-progress" class="bg-school h-5 rounded-full transition-all duration-1000" style="width:100%"></div>
                 </div>
                 <div class="flex gap-3">
-                    <button id="timer-pause-btn" onclick="togglePause()" class="flex-1 bg-yellow-400 text-white font-bold py-5 rounded-xl hover:bg-yellow-500 transition-colors text-xl">&#x23F8; いったん とめる</button>
-                    <button onclick="resetTimer()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-5 rounded-xl hover:bg-gray-200 transition-colors text-xl">リセット</button>
+                    <button id="timer-pause-btn" onclick="togglePause()" class="flex-1 bg-yellow-400 text-white font-bold py-5 rounded-xl hover:bg-yellow-500 transition-colors text-xl"></button>
+                    <button onclick="resetTimer()" data-i18n="timer_reset" class="flex-1 bg-gray-100 text-gray-600 font-bold py-5 rounded-xl hover:bg-gray-200 transition-colors text-xl"></button>
                 </div>
             </div>
             <div id="timer-timeup-screen" style="display:none;">
-                <p class="text-6xl mb-4">&#x1F389;</p>
-                <p class="text-3xl font-black text-accent mb-2">タイムアップ！</p>
-                <p class="text-gray-500 mb-6">じかんに なりました！</p>
-                <button onclick="resetTimer()" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors text-lg">もう一度</button>
+                <p class="text-6xl mb-4">🎉</p>
+                <p data-i18n="timer_timeup" class="text-3xl font-black text-accent mb-2"></p>
+                <p data-i18n="timer_timeup_sub" class="text-gray-500 mb-6"></p>
+                <button onclick="resetTimer()" data-i18n="timer_again" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors text-lg"></button>
             </div>
         </div>
     </div>
+
+    <!-- 言語選択バー -->
+    <div class="bg-school/90 text-white py-2 px-4">
+        <div class="max-w-3xl mx-auto flex justify-center gap-2">
+            <button onclick="setLang('bn')" id="lang-bn" class="lang-btn text-sm px-4 py-1 rounded-full text-white/80">বাংলা</button>
+            <button onclick="setLang('ne')" id="lang-ne" class="lang-btn text-sm px-4 py-1 rounded-full text-white/80">नेपाली</button>
+            <button onclick="setLang('en')" id="lang-en" class="lang-btn text-sm px-4 py-1 rounded-full text-white/80">English</button>
+            <button onclick="setLang('ja')" id="lang-ja" class="lang-btn text-sm px-4 py-1 rounded-full text-white/80">日本語</button>
+        </div>
+    </div>
+
     <header class="bg-school text-white shadow-lg">
         <div class="max-w-3xl mx-auto px-4 py-6 text-center">
-            <p class="text-sm text-blue-200 tracking-widest mb-1">秀明神戸国際学院</p>
-            <h1 class="text-4xl md:text-5xl font-black tracking-wide">C4 クラス</h1>
+            <p data-i18n="school" class="text-sm text-blue-200 tracking-widest mb-1"></p>
+            <h1 data-i18n="class" class="text-4xl md:text-5xl font-black tracking-wide"></h1>
             <div class="mt-4 flex flex-wrap justify-center gap-4 text-sm">
-                <span class="bg-white/20 rounded-full px-4 py-1">&#x1F4C5; 毎週月曜日　13:00 〜 16:15</span>
-                <span class="bg-white/20 rounded-full px-4 py-1">&#x1F468;&#x200D;&#x1F3EB; 担当：とくなが先生</span>
+                <span data-i18n="schedule_badge" class="bg-white/20 rounded-full px-4 py-1"></span>
+                <span data-i18n="teacher_badge" class="bg-white/20 rounded-full px-4 py-1"></span>
             </div>
         </div>
     </header>
+
     <main class="max-w-3xl mx-auto px-4 py-8 space-y-8">
         <section>
             <h2 class="text-lg font-bold text-school mb-4 flex items-center gap-2">
-                <span class="w-1 h-5 bg-accent rounded"></span>べんきょう リンク
+                <span class="w-1 h-5 bg-accent rounded"></span><span data-i18n="section_links"></span>
             </h2>
             <div class="grid grid-cols-3 sm:grid-cols-6 gap-3">
                 <a href="https://second-penguin-planning.github.io/roulette_japanese_language_sturding/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-school rounded-xl p-5 text-school font-bold text-center hover:bg-school hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">&#x1F3A1;</span><span class="text-sm leading-tight">ルーレット</span>
+                    <span class="text-3xl">🎡</span><span data-i18n="btn_roulette" class="text-sm leading-tight"></span>
                 </a>
                 <a href="https://second-penguin-planning.github.io/japanese-study-diagnosis2/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-accent rounded-xl p-5 text-accent font-bold text-center hover:bg-accent hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">&#x1F50D;</span><span class="text-sm leading-tight">学習タイプ 選定</span>
+                    <span class="text-3xl">🔍</span><span data-i18n="btn_studytype" class="text-sm leading-tight"></span>
                 </a>
                 <a href="https://www.irodori.jpf.go.jp/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-green-600 rounded-xl p-5 text-green-700 font-bold text-center hover:bg-green-600 hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">&#x1F33F;</span><span class="text-sm leading-tight">いろどり</span>
+                    <span class="text-3xl">🌿</span><span data-i18n="btn_irodori" class="text-sm leading-tight"></span>
                 </a>
                 <a href="https://second-penguin-planning.github.io/flush-cards/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-purple-600 rounded-xl p-5 text-purple-700 font-bold text-center hover:bg-purple-600 hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">&#x1F0CF;</span><span class="text-sm leading-tight">フラッシュカード</span>
+                    <span class="text-3xl">🃏</span><span data-i18n="btn_flashcard" class="text-sm leading-tight"></span>
                 </a>
                 <button onclick="openTimer()"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-orange-500 rounded-xl p-5 text-orange-600 font-bold text-center hover:bg-orange-500 hover:text-white transition-colors duration-200 shadow-sm cursor-pointer">
-                    <span class="text-3xl">&#x23F1;&#xFE0F;</span><span class="text-sm leading-tight">タイマー</span>
+                    <span class="text-3xl">⏱️</span><span data-i18n="btn_timer" class="text-sm leading-tight"></span>
                 </button>
                 <a href="https://second-penguin-planning.github.io/kobe-community-guide/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-teal-600 rounded-xl p-5 text-teal-700 font-bold text-center hover:bg-teal-600 hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">&#x1F5FA;&#xFE0F;</span><span class="text-sm leading-tight">神戸ガイド</span>
+                    <span class="text-3xl">🗺️</span><span data-i18n="btn_kobeguide" class="text-sm leading-tight"></span>
                 </a>
                 <a href="https://resume-system-nine.vercel.app/register" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-pink-500 rounded-xl p-5 text-pink-600 font-bold text-center hover:bg-pink-500 hover:text-white transition-colors duration-200 shadow-sm">
-                    <span class="text-3xl">&#x1F4DD;</span><span class="text-sm leading-tight">履歴書 作成</span>
+                    <span class="text-3xl">📝</span><span data-i18n="btn_resume" class="text-sm leading-tight"></span>
                 </a>
                 <button onclick="openQuestion()"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-yellow-500 rounded-xl p-5 text-yellow-600 font-bold text-center hover:bg-yellow-500 hover:text-white transition-colors duration-200 shadow-sm cursor-pointer">
-                    <span class="text-3xl">&#x2753;</span><span class="text-sm leading-tight">質問する</span>
+                    <span class="text-3xl">❓</span><span data-i18n="btn_question" class="text-sm leading-tight"></span>
                 </button>
             </div>
         </section>
+
         <section>
             <h2 class="text-lg font-bold text-school mb-4 flex items-center gap-2">
-                <span class="w-1 h-5 bg-accent rounded"></span>じゅぎょう スケジュール
+                <span class="w-1 h-5 bg-accent rounded"></span><span data-i18n="section_schedule"></span>
             </h2>
             <div class="space-y-2">
+                <!-- 5/18 終了 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">5月</p><p class="text-2xl font-black text-gray-400 leading-none">18</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="may" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">18</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">みんなの日本語</p><p class="text-base font-bold text-gray-500">第1課</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium">終了</span>
+                    <div class="flex-1"><p data-i18n="minna" class="text-xs text-gray-400 mb-0.5"></p><p class="text-base font-bold text-gray-500">第1課</p></div>
+                    <span data-i18n="done" class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
+                <!-- 5/25 終了 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">5月</p><p class="text-2xl font-black text-gray-400 leading-none">25</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="may" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">25</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">みんなの日本語</p><p class="text-base font-bold text-gray-500">第5課</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium">終了</span>
+                    <div class="flex-1"><p data-i18n="minna" class="text-xs text-gray-400 mb-0.5"></p><p class="text-base font-bold text-gray-500">第5課</p></div>
+                    <span data-i18n="done" class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
+                <!-- 6/1 終了 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">6月</p><p class="text-2xl font-black text-gray-400 leading-none">1</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="jun" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">1</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">みんなの日本語</p><p class="text-base font-bold text-gray-500">第9課</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium">終了</span>
+                    <div class="flex-1"><p data-i18n="minna" class="text-xs text-gray-400 mb-0.5"></p><p class="text-base font-bold text-gray-500">第9課</p></div>
+                    <span data-i18n="done" class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
+                <!-- 6/8 終了 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">6月</p><p class="text-2xl font-black text-gray-400 leading-none">8</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="jun" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">8</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">みんなの日本語</p><p class="text-base font-bold text-gray-500">第13課</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium">終了</span>
+                    <div class="flex-1"><p data-i18n="minna" class="text-xs text-gray-400 mb-0.5"></p><p class="text-base font-bold text-gray-500">第13課</p></div>
+                    <span data-i18n="done" class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
+                <!-- 6/15 終了 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">6月</p><p class="text-2xl font-black text-gray-400 leading-none">15</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="jun" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">15</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">みんなの日本語</p><p class="text-base font-bold text-gray-500">第17課</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium">終了</span>
+                    <div class="flex-1"><p data-i18n="minna" class="text-xs text-gray-400 mb-0.5"></p><p class="text-base font-bold text-gray-500">第17課</p></div>
+                    <span data-i18n="done" class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
+                <!-- 6/22 終了 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">6月</p><p class="text-2xl font-black text-gray-400 leading-none">22</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="jun" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">22</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">みんなの日本語</p><p class="text-base font-bold text-gray-500">第21課</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium">終了</span>
+                    <div class="flex-1"><p data-i18n="minna" class="text-xs text-gray-400 mb-0.5"></p><p class="text-base font-bold text-gray-500">第21課</p></div>
+                    <span data-i18n="done" class="text-xs bg-gray-100 text-gray-500 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
+                <!-- 6/29 今日 -->
                 <div class="lesson-card bg-school/5 rounded-lg shadow-sm border-2 border-school px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-school font-medium">6月</p><p class="text-2xl font-black text-school leading-none">29</p><p class="text-xs text-school">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="jun" class="text-xs text-school font-medium"></p><p class="text-2xl font-black text-school leading-none">29</p><p data-i18n="mon" class="text-xs text-school"></p></div>
                     <div class="h-10 w-px bg-school/30"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-500 mb-0.5">みんなの日本語</p><p class="text-base font-bold text-gray-800">第25課</p></div>
-                    <span class="today-badge text-xs bg-school text-white rounded-full px-2 py-0.5 font-bold">今日</span>
+                    <div class="flex-1"><p data-i18n="minna" class="text-xs text-gray-500 mb-0.5"></p><p class="text-base font-bold text-gray-800">第25課</p></div>
+                    <span data-i18n="today" class="today-badge text-xs bg-school text-white rounded-full px-2 py-0.5 font-bold"></span>
                 </div>
+                <!-- 7/6 予定 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">7月</p><p class="text-2xl font-black text-gray-400 leading-none">6</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="jul" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">6</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">内容</p><p class="text-base font-bold text-gray-400">未定</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-400 rounded-full px-2 py-0.5 font-medium">予定</span>
+                    <div class="flex-1"><p data-i18n="content" class="text-xs text-gray-400 mb-0.5"></p><p data-i18n="tbd" class="text-base font-bold text-gray-400"></p></div>
+                    <span data-i18n="planned" class="text-xs bg-gray-100 text-gray-400 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
+                <!-- 7/13 予定 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">7月</p><p class="text-2xl font-black text-gray-400 leading-none">13</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="jul" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">13</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">内容</p><p class="text-base font-bold text-gray-400">未定</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-400 rounded-full px-2 py-0.5 font-medium">予定</span>
+                    <div class="flex-1"><p data-i18n="content" class="text-xs text-gray-400 mb-0.5"></p><p data-i18n="tbd" class="text-base font-bold text-gray-400"></p></div>
+                    <span data-i18n="planned" class="text-xs bg-gray-100 text-gray-400 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
+                <!-- 7/27 予定 -->
                 <div class="lesson-card bg-white rounded-lg shadow-sm border border-gray-100 px-3 py-2 flex items-center gap-3">
-                    <div class="text-center min-w-[52px]"><p class="text-xs text-gray-400 font-medium">7月</p><p class="text-2xl font-black text-gray-400 leading-none">27</p><p class="text-xs text-gray-400">（月）</p></div>
+                    <div class="text-center min-w-[52px]"><p data-i18n="jul" class="text-xs text-gray-400 font-medium"></p><p class="text-2xl font-black text-gray-400 leading-none">27</p><p data-i18n="mon" class="text-xs text-gray-400"></p></div>
                     <div class="h-10 w-px bg-gray-200"></div>
-                    <div class="flex-1"><p class="text-xs text-gray-400 mb-0.5">内容</p><p class="text-base font-bold text-gray-400">未定</p></div>
-                    <span class="text-xs bg-gray-100 text-gray-400 rounded-full px-2 py-0.5 font-medium">予定</span>
+                    <div class="flex-1"><p data-i18n="content" class="text-xs text-gray-400 mb-0.5"></p><p data-i18n="tbd" class="text-base font-bold text-gray-400"></p></div>
+                    <span data-i18n="planned" class="text-xs bg-gray-100 text-gray-400 rounded-full px-2 py-0.5 font-medium"></span>
                 </div>
             </div>
         </section>
     </main>
+
     <footer class="mt-12 py-6 text-center text-xs text-gray-400">
-        <p>秀明神戸国際学院 C4クラス &nbsp;|&nbsp; 担当：とくなが先生</p>
+        <p data-i18n="footer"></p>
     </footer>
+
     <script>
-        var timerInterval = null;
-        var totalSeconds = 0;
-        var remainingSeconds = 0;
-        var isPaused = false;
+        // ── 翻訳データ ──────────────────────────────────────
+        var T = {
+            bn: {
+                school: 'শুমেই কোবে আন্তর্জাতিক একাডেমি',
+                class: 'C4 ক্লাস',
+                schedule_badge: '📅 প্রতি সোমবার  ১৩:০০ – ১৬:১৫',
+                teacher_badge: '👨‍🏫 শিক্ষক: তোকুনাগা',
+                section_links: 'পড়াশোনার লিংক',
+                section_schedule: 'ক্লাসের সময়সূচি',
+                btn_roulette: 'রুলেট', btn_studytype: 'পড়ার ধরন', btn_irodori: 'ইরোদোরি',
+                btn_flashcard: 'ফ্ল্যাশকার্ড', btn_timer: 'টাইমার', btn_kobeguide: 'কোবে গাইড',
+                btn_resume: 'রেজুমে তৈরি', btn_question: 'প্রশ্ন করুন',
+                may: 'মে', jun: 'জুন', jul: 'জুলাই', mon: '(সোম)',
+                minna: 'মিন্না নো নিহোঙ্গো',
+                done: 'শেষ', today: 'আজ', planned: 'পরিকল্পিত',
+                tbd: 'অনির্ধারিত', content: 'বিষয়',
+                timer_title: '⏱️ টাইমার', timer_min: 'মিনিট',
+                timer_start: 'শুরু', timer_close: 'বন্ধ',
+                timer_remaining: 'বাকি সময়',
+                timer_pause: '⏸ বিরতি', timer_resume: '▶ চালিয়ে যান',
+                timer_reset: 'রিসেট', timer_timeup: 'সময় শেষ!',
+                timer_timeup_sub: 'সময় হয়ে গেছে!', timer_again: 'আবার',
+                q_title: '❓ প্রশ্ন করুন',
+                q_name: 'নাম', q_name_ph: 'উদা: Ahmad Ali',
+                q_country: 'জাতীয়তা', q_country_ph: 'উদা: Bangladesh',
+                q_email: 'ইমেইল', q_email_ph: 'উদা: example@email.com',
+                q_message: 'প্রশ্ন', q_message_ph: 'আপনার প্রশ্ন লিখুন।',
+                q_send: '📨 পাঠান', q_close: 'বন্ধ',
+                q_error_empty: 'সব তথ্য পূরণ করুন।',
+                q_sending: 'পাঠানো হচ্ছে…',
+                q_success_title: 'পাঠানো হয়েছে!',
+                q_success_sub: 'তোকুনাগা শিক্ষকের কাছে পৌঁছাবে।',
+                q_err_title: 'ত্রুটি হয়েছে', q_err_sub: 'আবার চেষ্টা করুন।',
+                q_back: 'ফিরে যান',
+                footer: 'শুমেই কোবে আন্তর্জাতিক একাডেমি C4 ক্লাস | শিক্ষক: তোকুনাগা',
+            },
+            ne: {
+                school: 'शुमेई कोबे अन्तर्राष्ट्रिय विद्यालय',
+                class: 'C4 कक्षा',
+                schedule_badge: '📅 हरेक सोमबार  १३:०० – १६:१५',
+                teacher_badge: '👨‍🏫 शिक्षक: तोकुनागा',
+                section_links: 'पढाइ लिंक',
+                section_schedule: 'कक्षा तालिका',
+                btn_roulette: 'रुलेट', btn_studytype: 'पढाइ प्रकार', btn_irodori: 'इरोदोरि',
+                btn_flashcard: 'फ्ल्यासकार्ड', btn_timer: 'टाइमर', btn_kobeguide: 'कोबे गाइड',
+                btn_resume: 'रिजुमे बनाउनुहोस्', btn_question: 'प्रश्न गर्नुहोस्',
+                may: 'मे', jun: 'जुन', jul: 'जुलाई', mon: '(सोम)',
+                minna: 'मिन्ना नो निहोङ्गो',
+                done: 'सकियो', today: 'आज', planned: 'तय',
+                tbd: 'अनिर्धारित', content: 'विषय',
+                timer_title: '⏱️ टाइमर', timer_min: 'मिनेट',
+                timer_start: 'सुरु', timer_close: 'बन्द',
+                timer_remaining: 'बाँकि समय',
+                timer_pause: '⏸ रोक्नुहोस्', timer_resume: '▶ जारी राख्नुहोस्',
+                timer_reset: 'रिसेट', timer_timeup: 'समय सकियो!',
+                timer_timeup_sub: 'समय भयो!', timer_again: 'फेरि',
+                q_title: '❓ प्रश्न गर्नुहोस्',
+                q_name: 'नाम', q_name_ph: 'उदा: Ahmad Ali',
+                q_country: 'राष्ट्रियता', q_country_ph: 'उदा: Nepal',
+                q_email: 'इमेल', q_email_ph: 'उदा: example@email.com',
+                q_message: 'प्रश्न', q_message_ph: 'आफ्नो प्रश्न लेख्नुहोस्।',
+                q_send: '📨 पठाउनुहोस्', q_close: 'बन्द',
+                q_error_empty: 'सबै जानकारी भर्नुहोस्।',
+                q_sending: 'पठाउँदैछ…',
+                q_success_title: 'पठाइयो!',
+                q_success_sub: 'तोकुनागा शिक्षकलाई पुग्नेछ।',
+                q_err_title: 'त्रुटि भयो', q_err_sub: 'फेरि प्रयास गर्नुहोस्।',
+                q_back: 'फर्कनुहोस्',
+                footer: 'शुमेई कोबे अन्तर्राष्ट्रिय विद्यालय C4 कक्षा | शिक्षक: तोकुनागा',
+            },
+            en: {
+                school: 'Shumei Kobe International Academy',
+                class: 'C4 Class',
+                schedule_badge: '📅 Every Monday  13:00 – 16:15',
+                teacher_badge: '👨‍🏫 Teacher: Tokunaga',
+                section_links: 'Study Links',
+                section_schedule: 'Class Schedule',
+                btn_roulette: 'Roulette', btn_studytype: 'Study Type', btn_irodori: 'Irodori',
+                btn_flashcard: 'Flash Cards', btn_timer: 'Timer', btn_kobeguide: 'Kobe Guide',
+                btn_resume: 'Make Resume', btn_question: 'Ask a Question',
+                may: 'May', jun: 'Jun', jul: 'Jul', mon: '(Mon)',
+                minna: 'Minna no Nihongo',
+                done: 'Done', today: 'Today', planned: 'Upcoming',
+                tbd: 'TBD', content: 'Content',
+                timer_title: '⏱️ Timer', timer_min: 'min',
+                timer_start: 'Start', timer_close: 'Close',
+                timer_remaining: 'Time Remaining',
+                timer_pause: '⏸ Pause', timer_resume: '▶ Resume',
+                timer_reset: 'Reset', timer_timeup: "Time's Up!",
+                timer_timeup_sub: 'Time is up!', timer_again: 'Again',
+                q_title: '❓ Ask a Question',
+                q_name: 'Name', q_name_ph: 'e.g. Ahmad Ali',
+                q_country: 'Nationality', q_country_ph: 'e.g. Bangladesh',
+                q_email: 'Email Address', q_email_ph: 'e.g. example@email.com',
+                q_message: 'Question', q_message_ph: 'Write your question here.',
+                q_send: '📨 Send', q_close: 'Close',
+                q_error_empty: 'Please fill in all fields.',
+                q_sending: 'Sending…',
+                q_success_title: 'Sent!',
+                q_success_sub: 'Your message will reach Teacher Tokunaga.',
+                q_err_title: 'Error', q_err_sub: 'Please try again.',
+                q_back: 'Back',
+                footer: 'Shumei Kobe International Academy C4 Class | Teacher: Tokunaga',
+            },
+            ja: {
+                school: '秀明神戸国際学院',
+                class: 'C4 クラス',
+                schedule_badge: '📅 毎週月曜日　13:00 〜 16:15',
+                teacher_badge: '👨‍🏫 担当：とくなが先生',
+                section_links: 'べんきょう リンク',
+                section_schedule: 'じゅぎょう スケジュール',
+                btn_roulette: 'ルーレット', btn_studytype: '学習タイプ 選定', btn_irodori: 'いろどり',
+                btn_flashcard: 'フラッシュカード', btn_timer: 'タイマー', btn_kobeguide: '神戸ガイド',
+                btn_resume: '履歴書 作成', btn_question: '質問する',
+                may: '5月', jun: '6月', jul: '7月', mon: '（月）',
+                minna: 'みんなの日本語',
+                done: '終了', today: '今日', planned: '予定',
+                tbd: '未定', content: '内容',
+                timer_title: '⏱️ タイマー', timer_min: '分',
+                timer_start: 'スタート', timer_close: 'とじる',
+                timer_remaining: 'のこり じかん',
+                timer_pause: '⏸ いったん とめる', timer_resume: '▶ つづける',
+                timer_reset: 'リセット', timer_timeup: 'タイムアップ！',
+                timer_timeup_sub: 'じかんに なりました！', timer_again: 'もう一度',
+                q_title: '❓ 質問する',
+                q_name: 'なまえ（名前）', q_name_ph: '例：Ahmad Ali',
+                q_country: 'こくせき（国籍）', q_country_ph: '例：Bangladesh',
+                q_email: 'メールアドレス', q_email_ph: '例：example@email.com',
+                q_message: 'しつもん（質問）', q_message_ph: '質問を書いてください。',
+                q_send: '📨 おくる', q_close: 'とじる',
+                q_error_empty: 'すべての項目を入力してください。',
+                q_sending: 'おくっています…',
+                q_success_title: 'おくりました！',
+                q_success_sub: 'とくなが先生にとどきます。',
+                q_err_title: 'エラーがありました', q_err_sub: 'もう一度 やってください。',
+                q_back: 'もどる',
+                footer: '秀明神戸国際学院 C4クラス　|　担当：とくなが先生',
+            }
+        };
+
+        var currentLang = localStorage.getItem('c4lang') || 'ja';
+
+        function setLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('c4lang', lang);
+            var d = T[lang];
+            // テキスト更新
+            document.querySelectorAll('[data-i18n]').forEach(function(el) {
+                var key = el.getAttribute('data-i18n');
+                if (d[key] !== undefined) el.textContent = d[key];
+            });
+            // placeholder 更新
+            document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+                var key = el.getAttribute('data-i18n-ph');
+                if (d[key] !== undefined) el.placeholder = d[key];
+            });
+            // 言語ボタンのアクティブ状態
+            ['bn','ne','en','ja'].forEach(function(l) {
+                var btn = document.getElementById('lang-' + l);
+                if (l === lang) { btn.classList.add('active'); }
+                else { btn.classList.remove('active'); }
+            });
+            // html lang 属性
+            var langMap = { ja: 'ja', en: 'en', bn: 'bn', ne: 'ne' };
+            document.documentElement.lang = langMap[lang] || 'ja';
+        }
+
+        // ── タイマー ──────────────────────────────────────
+        var timerInterval = null, totalSeconds = 0, remainingSeconds = 0, isPaused = false;
+
         function openTimer() {
-            document.getElementById("timer-modal").style.display = "flex";
-            showScreen("input");
+            document.getElementById('timer-modal').style.display = 'flex';
+            showScreen('input');
         }
         function closeTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            document.getElementById("timer-modal").style.display = "none";
+            clearInterval(timerInterval); timerInterval = null;
+            document.getElementById('timer-modal').style.display = 'none';
         }
         function showScreen(name) {
-            document.getElementById("timer-input-screen").style.display = name === "input" ? "block" : "none";
-            document.getElementById("timer-running-screen").style.display = name === "running" ? "block" : "none";
-            document.getElementById("timer-timeup-screen").style.display = name === "timeup" ? "block" : "none";
+            document.getElementById('timer-input-screen').style.display   = name === 'input'   ? 'block' : 'none';
+            document.getElementById('timer-running-screen').style.display = name === 'running' ? 'block' : 'none';
+            document.getElementById('timer-timeup-screen').style.display  = name === 'timeup'  ? 'block' : 'none';
         }
         function startTimer() {
-            var minutes = parseInt(document.getElementById("timer-minutes-input").value) || 1;
-            totalSeconds = minutes * 60;
-            remainingSeconds = totalSeconds;
-            isPaused = false;
-            updateDisplay();
-            updateProgress();
-            showScreen("running");
-            document.getElementById("timer-pause-btn").textContent = "⏸ いったん とめる";
+            var minutes = parseInt(document.getElementById('timer-minutes-input').value) || 1;
+            totalSeconds = minutes * 60; remainingSeconds = totalSeconds; isPaused = false;
+            updateDisplay(); updateProgress(); showScreen('running');
+            document.getElementById('timer-pause-btn').textContent = T[currentLang].timer_pause;
             clearInterval(timerInterval);
             timerInterval = setInterval(tick, 1000);
         }
         function tick() {
             if (isPaused) return;
-            remainingSeconds--;
-            updateDisplay();
-            updateProgress();
+            remainingSeconds--; updateDisplay(); updateProgress();
             if (remainingSeconds <= 0) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-                setTimeout(function() { showScreen("timeup"); }, 200);
+                clearInterval(timerInterval); timerInterval = null;
+                setTimeout(function() { showScreen('timeup'); }, 200);
             }
         }
         function updateDisplay() {
-            var m = Math.floor(remainingSeconds / 60);
-            var s = remainingSeconds % 60;
-            document.getElementById("timer-display").textContent =
-                String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+            var m = Math.floor(remainingSeconds / 60), s = remainingSeconds % 60;
+            document.getElementById('timer-display').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
         }
         function updateProgress() {
             var pct = totalSeconds > 0 ? (remainingSeconds / totalSeconds) * 100 : 0;
-            var bar = document.getElementById("timer-progress");
-            bar.style.width = pct + "%";
-            if (pct > 50) bar.className = "bg-school h-5 rounded-full transition-all duration-1000";
-            else if (pct > 20) bar.className = "bg-yellow-400 h-3 rounded-full transition-all duration-1000";
-            else bar.className = "bg-red-500 h-3 rounded-full transition-all duration-1000";
+            var bar = document.getElementById('timer-progress');
+            bar.style.width = pct + '%';
+            if (pct > 50) bar.className = 'bg-school h-5 rounded-full transition-all duration-1000';
+            else if (pct > 20) bar.className = 'bg-yellow-400 h-3 rounded-full transition-all duration-1000';
+            else bar.className = 'bg-red-500 h-3 rounded-full transition-all duration-1000';
         }
         function togglePause() {
             isPaused = !isPaused;
-            document.getElementById("timer-pause-btn").textContent = isPaused ? "▶ つづける" : "⏸ いったん とめる";
+            document.getElementById('timer-pause-btn').textContent = isPaused ? T[currentLang].timer_resume : T[currentLang].timer_pause;
         }
         function resetTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            showScreen("input");
+            clearInterval(timerInterval); timerInterval = null; showScreen('input');
         }
-        document.getElementById("timer-modal").addEventListener("click", function(e) {
-            if (e.target === this) closeTimer();
-        });
+        document.getElementById('timer-modal').addEventListener('click', function(e) { if (e.target === this) closeTimer(); });
 
-        // 質問フォーム
+        // ── 質問フォーム ──────────────────────────────────
         function openQuestion() {
             showQScreen('form');
             document.getElementById('q-name').value = '';
@@ -309,9 +491,7 @@
             document.getElementById('q-error').style.display = 'none';
             document.getElementById('question-modal').style.display = 'flex';
         }
-        function closeQuestion() {
-            document.getElementById('question-modal').style.display = 'none';
-        }
+        function closeQuestion() { document.getElementById('question-modal').style.display = 'none'; }
         function showQScreen(name) {
             document.getElementById('q-form-screen').style.display    = name === 'form'    ? 'block' : 'none';
             document.getElementById('q-sending-screen').style.display = name === 'sending' ? 'block' : 'none';
@@ -324,8 +504,7 @@
             var email   = document.getElementById('q-email').value.trim();
             var message = document.getElementById('q-message').value.trim();
             if (!name || !country || !email || !message) {
-                document.getElementById('q-error').style.display = 'block';
-                return;
+                document.getElementById('q-error').style.display = 'block'; return;
             }
             showQScreen('sending');
             try {
@@ -334,12 +513,13 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify({ name: name, country: country, email: email, message: message })
                 });
-                if (res.ok) { showQScreen('success'); } else { showQScreen('error'); }
+                showQScreen(res.ok ? 'success' : 'error');
             } catch(e) { showQScreen('error'); }
         }
-        document.getElementById('question-modal').addEventListener('click', function(e) {
-            if (e.target === this) closeQuestion();
-        });
+        document.getElementById('question-modal').addEventListener('click', function(e) { if (e.target === this) closeQuestion(); });
+
+        // 初期化
+        setLang(currentLang);
     </script>
 </body>
 </html>
