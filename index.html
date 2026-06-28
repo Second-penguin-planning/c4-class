@@ -29,6 +29,53 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+    <!-- 質問モーダル -->
+    <div id="question-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-full mx-4" style="width:480px">
+            <div id="q-form-screen">
+                <p class="text-2xl font-black text-school mb-5">&#x2753; 質問する</p>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">なまえ（名前）</label>
+                        <input id="q-name" type="text" placeholder="例：Ahmad Ali" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">こくせき（国籍）</label>
+                        <input id="q-country" type="text" placeholder="例：Bangladesh" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">メールアドレス</label>
+                        <input id="q-email" type="email" placeholder="例：example@email.com" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">しつもん（質問）</label>
+                        <textarea id="q-message" rows="4" placeholder="質問を書いてください。" class="w-full border-2 border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-school resize-none"></textarea>
+                    </div>
+                </div>
+                <p id="q-error" class="text-xs text-accent mt-2" style="display:none;">すべての項目を入力してください。</p>
+                <div class="flex gap-3 mt-5">
+                    <button onclick="sendQuestion()" class="flex-1 bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors text-base">&#x1F4E8; おくる</button>
+                    <button onclick="closeQuestion()" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors text-base">とじる</button>
+                </div>
+            </div>
+            <div id="q-sending-screen" style="display:none;" class="text-center py-6">
+                <p class="text-4xl mb-3">&#x23F3;</p>
+                <p class="text-lg font-bold text-gray-500">おくっています…</p>
+            </div>
+            <div id="q-success-screen" style="display:none;" class="text-center py-6">
+                <p class="text-5xl mb-3">&#x2705;</p>
+                <p class="text-xl font-black text-school mb-2">おくりました！</p>
+                <p class="text-sm text-gray-500 mb-6">とくなが先生にとどきます。</p>
+                <button onclick="closeQuestion()" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors">とじる</button>
+            </div>
+            <div id="q-error-screen" style="display:none;" class="text-center py-6">
+                <p class="text-5xl mb-3">&#x274C;</p>
+                <p class="text-xl font-black text-accent mb-2">エラーがありました</p>
+                <p class="text-sm text-gray-500 mb-6">もう一度 やってください。</p>
+                <button onclick="showQScreen('form')" class="w-full bg-school text-white font-bold py-3 rounded-xl hover:bg-blue-900 transition-colors">もどる</button>
+            </div>
+        </div>
+    </div>
     <div id="timer-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
         <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-full mx-4 text-center" style="width:512px">
             <div id="timer-input-screen">
@@ -106,6 +153,10 @@
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-pink-500 rounded-xl p-5 text-pink-600 font-bold text-center hover:bg-pink-500 hover:text-white transition-colors duration-200 shadow-sm">
                     <span class="text-3xl">&#x1F4DD;</span><span class="text-sm leading-tight">履歴書 作成</span>
                 </a>
+                <button onclick="openQuestion()"
+                   class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-yellow-500 rounded-xl p-5 text-yellow-600 font-bold text-center hover:bg-yellow-500 hover:text-white transition-colors duration-200 shadow-sm cursor-pointer">
+                    <span class="text-3xl">&#x2753;</span><span class="text-sm leading-tight">質問する</span>
+                </button>
             </div>
         </section>
         <section>
@@ -246,6 +297,48 @@
         }
         document.getElementById("timer-modal").addEventListener("click", function(e) {
             if (e.target === this) closeTimer();
+        });
+
+        // 質問フォーム
+        function openQuestion() {
+            showQScreen('form');
+            document.getElementById('q-name').value = '';
+            document.getElementById('q-country').value = '';
+            document.getElementById('q-email').value = '';
+            document.getElementById('q-message').value = '';
+            document.getElementById('q-error').style.display = 'none';
+            document.getElementById('question-modal').style.display = 'flex';
+        }
+        function closeQuestion() {
+            document.getElementById('question-modal').style.display = 'none';
+        }
+        function showQScreen(name) {
+            document.getElementById('q-form-screen').style.display    = name === 'form'    ? 'block' : 'none';
+            document.getElementById('q-sending-screen').style.display = name === 'sending' ? 'block' : 'none';
+            document.getElementById('q-success-screen').style.display = name === 'success' ? 'block' : 'none';
+            document.getElementById('q-error-screen').style.display   = name === 'error'   ? 'block' : 'none';
+        }
+        async function sendQuestion() {
+            var name    = document.getElementById('q-name').value.trim();
+            var country = document.getElementById('q-country').value.trim();
+            var email   = document.getElementById('q-email').value.trim();
+            var message = document.getElementById('q-message').value.trim();
+            if (!name || !country || !email || !message) {
+                document.getElementById('q-error').style.display = 'block';
+                return;
+            }
+            showQScreen('sending');
+            try {
+                var res = await fetch('https://formspree.io/f/REPLACE_WITH_FORM_ID', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ name: name, country: country, email: email, message: message })
+                });
+                if (res.ok) { showQScreen('success'); } else { showQScreen('error'); }
+            } catch(e) { showQScreen('error'); }
+        }
+        document.getElementById('question-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeQuestion();
         });
     </script>
 </body>
