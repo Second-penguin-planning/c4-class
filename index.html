@@ -28,6 +28,8 @@
         .timer-digit { font-variant-numeric: tabular-nums; }
         .lang-btn { transition: all 0.15s; }
         .lang-btn.active { background: white; color: #1a3a6e; font-weight: 800; }
+        @keyframes whoamiFlash { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+        .whoami-flash { animation: whoamiFlash 0.5s infinite; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -115,6 +117,34 @@
         </div>
     </div>
 
+    <!-- 私は誰でしょうクイズモーダル -->
+    <div id="whoami-modal" class="fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm" style="display:none;">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-10 max-w-full mx-4" style="width:700px">
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <button onclick="closeWhoAmI()" class="text-gray-300 hover:text-gray-600 text-2xl font-black leading-none shrink-0">✕</button>
+                <div class="flex flex-col items-end gap-2 shrink-0">
+                    <div id="whoami-timer-display" class="text-3xl font-black text-school timer-digit">--:--</div>
+                    <div class="flex gap-1">
+                        <button id="whoami-min3" onclick="startWhoAmITimer(3)" class="px-3 py-1 rounded-full bg-school text-white text-xs font-bold hover:bg-blue-900 transition-colors"></button>
+                        <button id="whoami-min2" onclick="startWhoAmITimer(2)" class="px-3 py-1 rounded-full bg-school text-white text-xs font-bold hover:bg-blue-900 transition-colors"></button>
+                        <button id="whoami-min1" onclick="startWhoAmITimer(1)" class="px-3 py-1 rounded-full bg-school text-white text-xs font-bold hover:bg-blue-900 transition-colors"></button>
+                    </div>
+                </div>
+            </div>
+
+            <p data-i18n="whoami_title" class="text-center text-sm font-bold text-gray-400 mb-2"></p>
+
+            <div class="text-center py-8">
+                <p id="whoami-reading" class="text-lg text-gray-400 mb-2 h-6"></p>
+                <p id="whoami-word" class="font-black text-school leading-tight break-words" style="font-size:4.2rem">…</p>
+            </div>
+
+            <div class="flex justify-center">
+                <button onclick="nextWhoAmIWord()" data-i18n="whoami_next" class="bg-accent text-white font-bold px-8 py-4 rounded-xl hover:bg-red-800 transition-colors text-xl"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- 言語選択バー -->
     <div class="bg-school/90 text-white py-2 px-4">
         <div class="max-w-3xl mx-auto flex justify-center gap-2">
@@ -161,6 +191,10 @@
                 <button onclick="openTimer()"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-orange-500 rounded-xl p-5 text-orange-600 font-bold text-center hover:bg-orange-500 hover:text-white transition-colors duration-200 shadow-sm cursor-pointer">
                     <span class="text-3xl">⏱️</span><span data-i18n="btn_timer" class="text-sm leading-tight"></span>
+                </button>
+                <button onclick="openWhoAmI()"
+                   class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-indigo-600 rounded-xl p-5 text-indigo-700 font-bold text-center hover:bg-indigo-600 hover:text-white transition-colors duration-200 shadow-sm cursor-pointer">
+                    <span class="text-3xl">🎭</span><span data-i18n="btn_whoami" class="text-sm leading-tight"></span>
                 </button>
                 <a href="https://second-penguin-planning.github.io/kobe-community-guide/" target="_blank"
                    class="flex flex-col items-center justify-center gap-2 bg-white border-2 border-teal-600 rounded-xl p-5 text-teal-700 font-bold text-center hover:bg-teal-600 hover:text-white transition-colors duration-200 shadow-sm">
@@ -271,8 +305,10 @@
                 section_links: 'পড়াশোনার লিংক',
                 section_schedule: 'ক্লাসের সময়সূচি',
                 btn_roulette: 'রুলেট', btn_studytype: 'পড়ার ধরন', btn_irodori: 'ইরোদোরি',
-                btn_flashcard: 'ফ্ল্যাশকার্ড', btn_timer: 'টাইমার', btn_kobeguide: 'কোবে গাইড',
+                btn_flashcard: 'ফ্ল্যাশকার্ড', btn_timer: 'টাইমার', btn_whoami: 'আমি কে?', btn_kobeguide: 'কোবে গাইড',
                 btn_resume: 'রেজুমে তৈরি', btn_question: 'প্রশ্ন করুন',
+                whoami_title: '🎭 আমি কে? কুইজ — শব্দটি না বলে বর্ণনা করুন!',
+                whoami_next: '🔀 পরবর্তী শব্দ',
                 may: 'মে', jun: 'জুন', jul: 'জুলাই', mon: '(সোম)',
                 minna: 'মিন্না নো নিহোঙ্গো',
                 done: 'শেষ', today: 'আজ', planned: 'পরিকল্পিত',
@@ -305,8 +341,10 @@
                 section_links: 'पढाइ लिंक',
                 section_schedule: 'कक्षा तालिका',
                 btn_roulette: 'रुलेट', btn_studytype: 'पढाइ प्रकार', btn_irodori: 'इरोदोरि',
-                btn_flashcard: 'फ्ल्यासकार्ड', btn_timer: 'टाइमर', btn_kobeguide: 'कोबे गाइड',
+                btn_flashcard: 'फ्ल्यासकार्ड', btn_timer: 'टाइमर', btn_whoami: 'म को हुँ?', btn_kobeguide: 'कोबे गाइड',
                 btn_resume: 'रिजुमे बनाउनुहोस्', btn_question: 'प्रश्न गर्नुहोस्',
+                whoami_title: '🎭 म को हुँ? क्विज — शब्द नभनी वर्णन गर्नुहोस्!',
+                whoami_next: '🔀 अर्को शब्द',
                 may: 'मे', jun: 'जुन', jul: 'जुलाई', mon: '(सोम)',
                 minna: 'मिन्ना नो निहोङ्गो',
                 done: 'सकियो', today: 'आज', planned: 'तय',
@@ -339,8 +377,10 @@
                 section_links: 'Study Links',
                 section_schedule: 'Class Schedule',
                 btn_roulette: 'Roulette', btn_studytype: 'Study Type', btn_irodori: 'Irodori',
-                btn_flashcard: 'Flash Cards', btn_timer: 'Timer', btn_kobeguide: 'Kobe Guide',
+                btn_flashcard: 'Flash Cards', btn_timer: 'Timer', btn_whoami: 'Who Am I?', btn_kobeguide: 'Kobe Guide',
                 btn_resume: 'Make Resume', btn_question: 'Ask a Question',
+                whoami_title: '🎭 Who Am I? Quiz — Describe the word without saying it!',
+                whoami_next: '🔀 Next Word',
                 may: 'May', jun: 'Jun', jul: 'Jul', mon: '(Mon)',
                 minna: 'Minna no Nihongo',
                 done: 'Done', today: 'Today', planned: 'Upcoming',
@@ -373,8 +413,10 @@
                 section_links: 'べんきょう リンク',
                 section_schedule: 'じゅぎょう スケジュール',
                 btn_roulette: 'ルーレット', btn_studytype: '学習タイプ 選定', btn_irodori: 'いろどり',
-                btn_flashcard: 'フラッシュカード', btn_timer: 'タイマー', btn_kobeguide: '神戸ガイド',
+                btn_flashcard: 'フラッシュカード', btn_timer: 'タイマー', btn_whoami: '私は誰でしょう', btn_kobeguide: '神戸ガイド',
                 btn_resume: '履歴書 作成', btn_question: '質問する',
+                whoami_title: '🎭 私は誰でしょう クイズ — ことばを 言わずに せつめいしよう！',
+                whoami_next: '🔀 つぎの ことば',
                 may: '5月', jun: '6月', jul: '7月', mon: '（月）',
                 minna: 'みんなの日本語',
                 done: '終了', today: '今日', planned: '予定',
@@ -426,7 +468,104 @@
             // html lang 属性
             var langMap = { ja: 'ja', en: 'en', bn: 'bn', ne: 'ne' };
             document.documentElement.lang = langMap[lang] || 'ja';
+            // 私は誰でしょう クイズ：分ボタンのラベル更新
+            [3, 2, 1].forEach(function(n) {
+                var btn = document.getElementById('whoami-min' + n);
+                if (btn) btn.textContent = n + (lang === 'ja' ? '' : ' ') + d.timer_min;
+            });
         }
+
+        // ── 私は誰でしょう クイズ：ことばデータベース（N5・N4 + 生活語彙 150語）──
+        var whoamiWords = [
+            ['ご飯','ごはん'], ['パン',null], ['水','みず'], ['お茶','おちゃ'], ['コーヒー',null],
+            ['牛乳','ぎゅうにゅう'], ['卵','たまご'], ['肉','にく'], ['魚','さかな'], ['野菜','やさい'],
+            ['果物','くだもの'], ['りんご',null], ['バナナ',null], ['みかん',null], ['寿司','すし'],
+            ['ラーメン',null], ['カレー',null], ['お弁当','おべんとう'], ['お菓子','おかし'], ['ケーキ',null],
+            ['犬','いぬ'], ['猫','ねこ'], ['鳥','とり'], ['うさぎ',null], ['象','ぞう'],
+            ['ライオン',null], ['猿','さる'], ['馬','うま'], ['豚','ぶた'], ['羊','ひつじ'],
+            ['熊','くま'], ['虎','とら'], ['蛇','へび'], ['亀','かめ'], ['牛','うし'],
+            ['頭','あたま'], ['顔','かお'], ['目','め'], ['耳','みみ'], ['鼻','はな'],
+            ['口','くち'], ['手','て'], ['足','あし'], ['お腹','おなか'], ['歯','は'],
+            ['お父さん','おとうさん'], ['お母さん','おかあさん'], ['お兄さん','おにいさん'], ['お姉さん','おねえさん'], ['兄','あに'],
+            ['妹','いもうと'], ['弟','おとうと'], ['祖母','そぼ'], ['祖父','そふ'], ['家族','かぞく'],
+            ['学校','がっこう'], ['先生','せんせい'], ['学生','がくせい'], ['教室','きょうしつ'], ['本','ほん'],
+            ['鉛筆','えんぴつ'], ['辞書','じしょ'], ['鞄','かばん'], ['机','つくえ'], ['椅子','いす'],
+            ['仕事','しごと'], ['会社','かいしゃ'], ['病院','びょういん'], ['医者','いしゃ'], ['警察官','けいさつかん'],
+            ['駅','えき'], ['空港','くうこう'], ['銀行','ぎんこう'], ['郵便局','ゆうびんきょく'], ['コンビニ',null],
+            ['スーパー',null], ['市役所','しやくしょ'], ['図書館','としょかん'], ['公園','こうえん'], ['レストラン',null],
+            ['ホテル',null], ['デパート',null], ['神社','じんじゃ'], ['お寺','おてら'], ['美容院','びよういん'],
+            ['電車','でんしゃ'], ['バス',null], ['タクシー',null], ['自転車','じてんしゃ'], ['車','くるま'],
+            ['飛行機','ひこうき'], ['船','ふね'], ['新幹線','しんかんせん'], ['バイク',null], ['エレベーター',null],
+            ['携帯電話','けいたいでんわ'], ['スマホ',null], ['テレビ',null], ['冷蔵庫','れいぞうこ'], ['洗濯機','せんたくき'],
+            ['布団','ふとん'], ['傘','かさ'], ['眼鏡','めがね'], ['時計','とけい'], ['財布','さいふ'],
+            ['鍵','かぎ'], ['在留カード','ざいりゅうカード'], ['定期券','ていきけん'], ['電子マネー','でんしマネー'], ['ゴミ袋','ごみぶくろ'],
+            ['雨','あめ'], ['雪','ゆき'], ['風','かぜ'], ['太陽','たいよう'], ['月','つき'],
+            ['星','ほし'], ['空','そら'], ['海','うみ'], ['山','やま'], ['川','かわ'],
+            ['春','はる'], ['夏','なつ'], ['秋','あき'], ['冬','ふゆ'], ['お祭り','おまつり'],
+            ['大きい','おおきい'], ['小さい','ちいさい'], ['暑い','あつい'], ['寒い','さむい'], ['高い','たかい'],
+            ['安い','やすい'], ['美味しい','おいしい'], ['楽しい','たのしい'], ['忙しい','いそがしい'], ['親切','しんせつ'],
+            ['食べる','たべる'], ['飲む','のむ'], ['行く','いく'], ['来る','くる'], ['見る','みる'],
+            ['聞く','きく'], ['話す','はなす'], ['書く','かく'], ['読む','よむ'], ['寝る','ねる'],
+            ['サッカー',null], ['野球','やきゅう'], ['水泳','すいえい'], ['音楽','おんがく'], ['映画','えいが']
+        ];
+        var whoamiTimerInterval = null, whoamiRemaining = 0;
+
+        function openWhoAmI() {
+            clearInterval(whoamiTimerInterval); whoamiTimerInterval = null;
+            var disp = document.getElementById('whoami-timer-display');
+            disp.textContent = '--:--';
+            disp.classList.remove('whoami-flash', 'text-red-600');
+            disp.classList.add('text-school');
+            document.getElementById('whoami-modal').style.display = 'flex';
+            nextWhoAmIWord();
+        }
+        function closeWhoAmI() {
+            clearInterval(whoamiTimerInterval); whoamiTimerInterval = null;
+            document.getElementById('whoami-modal').style.display = 'none';
+        }
+        function nextWhoAmIWord() {
+            var pair = whoamiWords[Math.floor(Math.random() * whoamiWords.length)];
+            document.getElementById('whoami-word').textContent = pair[0];
+            document.getElementById('whoami-reading').textContent = pair[1] || '';
+        }
+        function startWhoAmITimer(minutes) {
+            clearInterval(whoamiTimerInterval);
+            whoamiRemaining = minutes * 60;
+            var disp = document.getElementById('whoami-timer-display');
+            disp.classList.remove('whoami-flash', 'text-red-600');
+            disp.classList.add('text-school');
+            updateWhoAmITimerDisplay();
+            whoamiTimerInterval = setInterval(function() {
+                whoamiRemaining--;
+                updateWhoAmITimerDisplay();
+                if (whoamiRemaining <= 0) {
+                    clearInterval(whoamiTimerInterval); whoamiTimerInterval = null;
+                    disp.classList.remove('text-school');
+                    disp.classList.add('text-red-600', 'whoami-flash');
+                    playWhoAmIBuzzer();
+                }
+            }, 1000);
+        }
+        function updateWhoAmITimerDisplay() {
+            var m = Math.floor(whoamiRemaining / 60), s = whoamiRemaining % 60;
+            document.getElementById('whoami-timer-display').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }
+        function playWhoAmIBuzzer() {
+            try {
+                var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                var osc = ctx.createOscillator(), gain = ctx.createGain();
+                osc.type = 'square'; osc.frequency.value = 440;
+                osc.connect(gain); gain.connect(ctx.destination);
+                var t = ctx.currentTime;
+                [0, 0.4, 0.8].forEach(function(offset) {
+                    gain.gain.setValueAtTime(0.3, t + offset);
+                    gain.gain.setValueAtTime(0.0001, t + offset + 0.25);
+                });
+                osc.start(t);
+                osc.stop(t + 1.2);
+            } catch (e) { /* Web Audio 非対応環境では無音でスキップ */ }
+        }
+        document.getElementById('whoami-modal').addEventListener('click', function(e) { if (e.target === this) closeWhoAmI(); });
 
         // ── タイマー ──────────────────────────────────────
         var timerInterval = null, totalSeconds = 0, remainingSeconds = 0, isPaused = false;
